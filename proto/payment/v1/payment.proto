@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package payment.v1;
+
+option go_package = "github.com/johncegom/stratapay/proto/payment/v1;paymentv1";
+
+enum PaymentState {
+  PAYMENT_STATE_UNSPECIFIED = 0;
+  PAYMENT_STATE_INITIATED = 1;
+  PAYMENT_STATE_PENDING = 2;
+  PAYMENT_STATE_CAPTURED = 3;
+  PAYMENT_STATE_FAILED = 4;
+}
+
+message CreatePaymentIntentResponse {
+  string payment_id = 1;
+  PaymentState state = 2;
+  string idempotency_key = 3;
+}
+
+service PaymentService {
+  rpc CreatePaymentIntent(CreatePaymentIntentResponse) returns (CreatePaymentIntentResponse);
+}

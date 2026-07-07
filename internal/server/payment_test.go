@@ -5,6 +5,7 @@ import (
 	"net"
 	"testing"
 
+	"github.com/johncegom/stratapay/internal/domain"
 	"github.com/johncegom/stratapay/internal/server"
 	paymentv1 "github.com/johncegom/stratapay/proto/payment/v1"
 	"google.golang.org/grpc"
@@ -18,11 +19,24 @@ const bufSize = 1024 * 1024
 
 var lis *bufconn.Listener
 
+type dummyUseCase struct{}
+
+func (d *dummyUseCase) CreateIntent(ctx context.Context, key string, amount int64, currency string, orderID string) (*domain.PaymentIntent, error) {
+	return &domain.PaymentIntent{
+		ID:             "pay_validated_stub_id",
+		IdempotencyKey: key,
+		AmountInCents:  amount,
+		Currency:       currency,
+		OrderID:        orderID,
+		State:          domain.StateInitiated,
+	}, nil
+}
+
 func setupTestServer(t *testing.T) paymentv1.PaymentServiceClient {
 	lis = bufconn.Listen(bufSize)
 	s := grpc.NewServer()
 
-	paymentServer := server.NewPaymentServer()
+	paymentServer := server.NewPaymentServer(&dummyUseCase{})
 	paymentv1.RegisterPaymentServiceServer(s, paymentServer)
 
 	go func() {

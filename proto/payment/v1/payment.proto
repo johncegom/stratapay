@@ -12,6 +12,13 @@ enum PaymentState {
   PAYMENT_STATE_FAILED = 4;
 }
 
+message CreatePaymentIntentRequest {
+  string idempotency_key = 1;
+  int64 amount_in_cents = 2;
+  string currency = 3;
+  string order_id = 4;
+}
+
 message CreatePaymentIntentResponse {
   string payment_id = 1;
   PaymentState state = 2;
@@ -19,5 +26,5 @@ message CreatePaymentIntentResponse {
 }
 
 service PaymentService {
-  rpc CreatePaymentIntent(CreatePaymentIntentResponse) returns (CreatePaymentIntentResponse);
+  rpc CreatePaymentIntent(CreatePaymentIntentRequest) returns (CreatePaymentIntentResponse);
 }

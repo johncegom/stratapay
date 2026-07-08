@@ -23,3 +23,8 @@ type PaymentIntent struct {
 type PaymentUseCase interface {
 	CreateIntent(ctx context.Context, key string, amount int64, currency string, orderID string) (*PaymentIntent, error)
 }
+
+type PaymentRepository interface {
+	Create(ctx context.Context, intent *PaymentIntent) error
+	FindByIdempotencyKey(ctx context.Context, key string) (*PaymentIntent, error)
+}

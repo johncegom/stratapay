@@ -59,7 +59,7 @@ func (r *PostgresPaymentRepository) FindByIdempotencyKey(ctx context.Context, ke
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errors.New("Payment intent not found")
+			return nil, errors.New("payment intent not found")
 		}
 		return nil, err
 	}

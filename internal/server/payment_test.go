@@ -67,7 +67,6 @@ func setupTestServer(t *testing.T) paymentv1.PaymentServiceClient {
 		}),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
-
 	if err != nil {
 		t.Fatalf("Failed to initialize modern gRPC client: %v", err)
 	}

@@ -141,12 +141,12 @@ interceptor → payment service → database/PSP); the remaining unlabeled
 arrows are the async fan-out (outbox → broker → downstream services) and
 the reconciliation batch job.
 
-### Fallback Diagram (GitHub-renderable)
+### Detailed Data-Flow Diagram
 
-GitHub's built-in Markdown viewer does not yet render `C4Container`
-diagrams, so here is the same architecture as a standard `flowchart`.
-Edge labels are kept short and placed on dedicated label nodes so they
-stay readable even on GitHub's default renderer.
+The C4 diagram above shows the container-level architecture. The
+`flowchart` below zooms in further, mapping containers to actual
+packages in this repo (`internal/domain`, `internal/usecase`,
+`internal/server`) and color-coding what's implemented vs. planned.
 
 ```mermaid
 flowchart LR

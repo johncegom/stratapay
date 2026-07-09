@@ -2,11 +2,13 @@ package server_test
 
 import (
 	"context"
+	"errors"
 	"net"
 	"testing"
 
 	"github.com/johncegom/stratapay/internal/domain"
 	"github.com/johncegom/stratapay/internal/server"
+	"github.com/johncegom/stratapay/internal/usecase"
 	paymentv1 "github.com/johncegom/stratapay/proto/payment/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -19,24 +21,32 @@ const bufSize = 1024 * 1024
 
 var lis *bufconn.Listener
 
-type dummyUseCase struct{}
+type mockRepositoryForServer struct {
+	store map[string]*domain.PaymentIntent
+}
 
-func (d *dummyUseCase) CreateIntent(ctx context.Context, key string, amount int64, currency string, orderID string) (*domain.PaymentIntent, error) {
-	return &domain.PaymentIntent{
-		ID:             "pay_validated_stub_id",
-		IdempotencyKey: key,
-		AmountInCents:  amount,
-		Currency:       currency,
-		OrderID:        orderID,
-		State:          domain.StateInitiated,
-	}, nil
+func (m *mockRepositoryForServer) Create(ctx context.Context, pi *domain.PaymentIntent) error {
+	m.store[pi.IdempotencyKey] = pi
+	return nil
+}
+
+func (m *mockRepositoryForServer) FindByIdempotencyKey(ctx context.Context, k string) (*domain.PaymentIntent, error) {
+	intent, exists := m.store[k]
+	if !exists {
+		return nil, errors.New("not found")
+	}
+	return intent, nil
 }
 
 func setupTestServer(t *testing.T) paymentv1.PaymentServiceClient {
 	lis = bufconn.Listen(bufSize)
 	s := grpc.NewServer()
 
-	paymentServer := server.NewPaymentServer(&dummyUseCase{})
+	mockRepo := &mockRepositoryForServer{store: make(map[string]*domain.PaymentIntent)}
+
+	realUseCase := usecase.NewPaymentInteractor(mockRepo)
+
+	paymentServer := server.NewPaymentServer(realUseCase)
 	paymentv1.RegisterPaymentServiceServer(s, paymentServer)
 
 	go func() {

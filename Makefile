@@ -8,7 +8,9 @@ else
 DOCKER_COMPOSE := docker-compose
 endif
 
-.PHONY: gen-proto test infra-up infra-down
+.PHONY: gen-proto test infra-up infra-down lint-install lint lint-fix
+
+ARGS ?=
 
 gen-proto:
 	protoc --go_out=. --go_opt=paths=source_relative \
@@ -23,5 +25,14 @@ infra-up:
 infra-down:
 	$(DOCKER_COMPOSE) down -v
 
+lint-install:
+	GOTOOLCHAIN=go1.26.4 go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+
+lint:
+	golangci-lint run --path-mode=abs --config=".golangci.yml" --timeout=5m
+
+lint-fix:
+	golangci-lint run --path-mode=abs --config=".golangci.yml" --timeout=5m --fix
+
 test:
-	go test -v -race -count=1 ./...
+	go test -v -race -failfast -count=1 ./... $(ARGS)

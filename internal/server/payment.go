@@ -37,7 +37,6 @@ func (s *PaymentServer) CreatePaymentIntent(
 		req.GetCurrency(),
 		req.GetOrderId(),
 	)
-
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
